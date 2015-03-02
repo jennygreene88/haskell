@@ -8,9 +8,13 @@ https://github.com/paperduck/haskell_demo
 
 Created with Haskell Platform 2014.2.0.0 for Windows, 32 bit
 
+https://www.haskell.org/platform/
+
+
 ### System Requirements
 
 a Haskell compiler
+
 
 ### Instructions
 
