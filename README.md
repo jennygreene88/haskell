@@ -32,21 +32,21 @@ Navigate to the fizzbuzz directory.
 
 Load the fizzbuzz.hs module using this command:
 
-'''
+```haskell
 :l fizzbuzz
-'''
+```
 
 Fizz Buzz using list comprehension:
 
-'''
+```haskell
 fizzbuzz
-'''
+```
 
 Fizz Buzz using recursion:
 
-'''
+```haskell
 fizzbuzz_r
-'''
+```
 
 
 
