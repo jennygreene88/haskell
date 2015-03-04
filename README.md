@@ -28,23 +28,27 @@ GHCi version 7.8.3
 
 Open the GHCi command line.
 
-Navigate to the fizzbuzz directory.
+Navigate to the fizzbuzz directory using this command:
+
+```
+:cd C:\LocalDirectory\fizzbuzz\
+```
 
 Load the fizzbuzz.hs module using this command:
 
-```haskell
+```
 :l fizzbuzz
 ```
 
 Fizz Buzz using list comprehension:
 
-```haskell
+```
 fizzbuzz
 ```
 
 Fizz Buzz using recursion:
 
-```haskell
+```
 fizzbuzz_r
 ```
 
