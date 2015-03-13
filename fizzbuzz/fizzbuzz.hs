@@ -49,7 +49,7 @@ fb3 x_list = map fb_show x_list
 -- method 4: high-order function
 -- leaving out the second parameter to `map`.
 fb4 :: [Integer] -> [String]
-fb4 = (map fb_show)
+fb4 = (map fb_show_2)
  
 -- check if argument is divisible by 3 or 5
 -- using if statements
@@ -79,3 +79,9 @@ fb_show'' x = case (x `mod` 3) of 0 -> case (x `mod` 5) of 0 -> "FizzBuzz"
                                                            _ -> "Fizz"
                                   _ -> case (x `mod` 5) of 0 -> "Buzz"
                                                            _ -> show x
+-- a different approach that looks elegant but may perform more comparisons.
+fb_show_2 x
+    | (x `mod` 15 == 0) = "FizzBuzz"
+    | (x `mod` 3 == 0)  = "Fizz"
+    | (x `mod` 5 == 0)  = "Buzz"
+    | otherwise         = show x
