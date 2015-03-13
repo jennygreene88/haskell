@@ -1,12 +1,12 @@
-# About this project
+# About this repository
 
-This repository includes sample programs that I created using Haskell.
+This repository includes multiple projects that I created using Haskell.
 
-## GitHub URL:
+### GitHub URL
 
 [https://github.com/paperduck/haskell_demo](https://github.com/paperduck/haskell_demo)
 
-## Created with:
+### Created with
 
 Haskell Platform 2014.2.0.0 for Windows, 32 bit
 
@@ -14,47 +14,60 @@ GHCi version 7.8.3
 
 [https://www.haskell.org/platform/](https://www.haskell.org/platform/)
 
-## System Requirements
+### System Requirements
 
-...
+Something that can run GHCi.
 
-# Demo Details
+# Projects
 
-## Fizz Buzz
+### Fizz Buzz
 
-### Task:
+##### About this project
 
-Write a program that prints the numbers from 1 to 100. But for multiples of three print “Fizz” instead of the number and for the multiples of five print “Buzz”. For numbers which are multiples of both three and five print “FizzBuzz”.
+Implements various solutions to the Fizz Buzz problem, using various Haskell constructs. Created as a way to use concepts as I learn them. The Fizz Buzz problem is defined like this:
 
-### How to Run
+> Write a program that prints the numbers from 1 to 100. But for multiples of three print “Fizz” instead of the number and for the multiples of five print “Buzz”. For numbers which are multiples of both three and five print “FizzBuzz”.
 
-#### Using GHCi
+##### Instructions
 
 Open the GHCi command line.
 
-Navigate to the fizzbuzz directory using this command, replacing "LocalDirectory" with your local path.
+Navigate to the fizzbuzz directory using the `cd` command, adjusting the path as necessary:
 
 ```
-:cd C:\LocalDirectory\fizzbuzz\
+:cd C:\Users\Me\Documents\haskell\fizzbuzz\
 ```
 
-Load the fizzbuzz.hs module using this command:
+Load the fizzbuzz.hs module:
 
 ```
 :l fizzbuzz
 ```
 
-Fizz Buzz using list comprehension:
+Run Fizz Buzz using list comprehension:
 
 ```
 fizzbuzz
 ```
 
-Fizz Buzz using recursion:
+Run Fizz Buzz using recursion:
 
 ```
 fizzbuzz_r
 ```
 
+Run Fizz Buzz using a map:
+
+```
+fizzbuzz_map
+```
+
+Run Fizz Buzz using a high-order function:
+
+```
+fizzbuzz_high
+```
+
+**~END OF DOCUMENT~**
 
 
