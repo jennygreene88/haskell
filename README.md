@@ -38,7 +38,7 @@ Navigate to the fizzbuzz directory using the `cd` command, adjusting the path as
 :cd C:\Users\Me\Documents\haskell\fizzbuzz\
 ```
 
-Load the fizzbuzz.hs module:
+Load the `fizzbuzz.hs` module:
 
 ```
 :l fizzbuzz
