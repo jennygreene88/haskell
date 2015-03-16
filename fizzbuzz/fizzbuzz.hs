@@ -26,6 +26,7 @@
 -- fizzbuzz functions to be called by user
 fizzbuzz = fb1 [1..100]
 fizzbuzz_r = fb2 1 100 []
+fizzbuzz_r2 = fb5 [1..100]
 fizzbuzz_map = fb3 [1..100]
 fizzbuzz_high = fb4 [1..100]
 
@@ -34,6 +35,7 @@ fb1 :: (Integral a, Show a) => [a] -> [String]
 fb1 x_list = [ fb_show x | x <- x_list ]
 
 -- method 2: recursive
+-- Working from right to left, take the last element of 
 -- error on: start number > end number
 -- edge condition: when processing the start number
 fb2 :: (Integral a, Show a) => a -> a -> [String] -> [String]
@@ -50,7 +52,11 @@ fb3 x_list = map fb_show x_list
 -- leaving out the second parameter to `map`.
 fb4 :: [Integer] -> [String]
 fb4 = (map fb_show)
- 
+
+-- recursive fold
+fb5 x_list = foldr (\x acc -> (fb_show x) : acc) [] x_list
+
+------------------------------------------ 
 -- check if argument is divisible by 3 or 5
 -- using if statements
 fb_show :: ( Integral a, Show a) => a -> String
