@@ -85,3 +85,9 @@ fb_show'' x = case (x `mod` 3) of 0 -> case (x `mod` 5) of 0 -> "FizzBuzz"
                                                            _ -> "Fizz"
                                   _ -> case (x `mod` 5) of 0 -> "Buzz"
                                                            _ -> show x
+-- a different approach that looks elegant but may perform more comparisons.
+fb_show_2 x
+    | (x `mod` 15 == 0) = "FizzBuzz"
+    | (x `mod` 3 == 0)  = "Fizz"
+    | (x `mod` 5 == 0)  = "Buzz"
+    | otherwise         = show x
