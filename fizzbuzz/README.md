@@ -6,6 +6,14 @@ Implements various solutions to the Fizz Buzz problem, using various Haskell con
 
 > Write a program that prints the numbers from 1 to 100. But for multiples of three print “Fizz” instead of the number and for the multiples of five print “Buzz”. For numbers which are multiples of both three and five print “FizzBuzz”.
 
+### Status
+
+2015-03-22
+
+##### Fizz Buzz
+
+The Fizz Buzz functions work fine. There is no end goal, so development will always be ongoing. 
+
 ### Instructions
 
 Open the GHCi command line.
