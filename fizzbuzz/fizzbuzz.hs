@@ -28,7 +28,7 @@ fizzbuzz = fb1 [1..100]
 fizzbuzz_r = fb2 1 100 []
 fizzbuzz_r2 = fb5 [1..100]
 fizzbuzz_map = fb3 [1..100]
-fizzbuzz_high = fb4 [1..100]
+fizzbuzz_high = fb4 [1..101]
 
 -- method 1: list comprehension
 fb1 :: (Integral a, Show a) => [a] -> [String]
@@ -51,7 +51,7 @@ fb3 x_list = map fb_show x_list
 -- method 4: high-order function
 -- leaving out the second parameter to `map`.
 fb4 :: [Integer] -> [String]
-fb4 = (map fb_show)
+fb4 = map fb_show
 
 -- recursive fold
 fb5 x_list = foldr (\x acc -> (fb_show x) : acc) [] x_list
@@ -85,8 +85,9 @@ fb_show'' x = case (x `mod` 3) of 0 -> case (x `mod` 5) of 0 -> "FizzBuzz"
                                                            _ -> "Fizz"
                                   _ -> case (x `mod` 5) of 0 -> "Buzz"
                                                            _ -> show x
+
 -- a different approach that looks elegant but may perform more comparisons.
-fb_show_2 x
+fb_show''' x
     | (x `mod` 15 == 0) = "FizzBuzz"
     | (x `mod` 3 == 0)  = "Fizz"
     | (x `mod` 5 == 0)  = "Buzz"
