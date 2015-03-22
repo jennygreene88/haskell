@@ -1,6 +1,6 @@
-# Project fizzbuzz
+# About Project fizzbuzz
 
-### About this project
+### Introduction
 
 Implements various solutions to the Fizz Buzz problem, using various Haskell constructs. Created as a way to use concepts as I learn them. The Fizz Buzz problem is defined like this:
 
@@ -44,4 +44,10 @@ Run Fizz Buzz using a high-order function:
 
 ```
 fizzbuzz_high
+```
+
+Run Fizz Buzz using a fold:
+
+```
+fizzbuzz_fold
 ```
