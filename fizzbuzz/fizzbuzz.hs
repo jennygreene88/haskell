@@ -3,7 +3,7 @@
 -- FizzBuzz
 --
 -- AUTHOR
---    Alan Kroner
+--    GitHub: paperduck
 --
 -- CREATED
 --    2015-03-01
@@ -23,8 +23,16 @@
 --    would be useful for retaining data types.
 ---------------------------------
 
+module Fizzbuzz
+( fizzbuzz_lc
+, fizzbuzz_r
+, fizzbuzz_map
+, fizzbuzz_high
+, fizzbuzz_fold
+) where
+
 -- fizzbuzz functions to be called by user
-fizzbuzz = fb [1..101]
+fizzbuzz_lc = fb [1..101]
 fizzbuzz_r = fb_r 1 102 []
 fizzbuzz_map = fb_map [1..103]
 fizzbuzz_high = fb_high [1..104]
