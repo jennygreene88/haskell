@@ -22,11 +22,11 @@ GHCi version 7.8.3
 
 Something that can run GHCi.
 
-# Project List
+### Project List
 
 For details on each project, read the README within each project folder.
 
-### Fizz Buzz
+##### Fizz Buzz
 
 Project folder: [fizzbuzz](https://github.com/paperduck/haskell_demo/tree/master/fizzbuzz)
 
