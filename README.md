@@ -1,8 +1,6 @@
-# About
-
 ### Introduction
 
-This repository includes multiple projects that I created using Haskell.
+Haskell stuff
 
 ### Created On
 
