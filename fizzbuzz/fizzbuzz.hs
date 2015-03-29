@@ -32,9 +32,9 @@ module Fizzbuzz
 ) where
 
 -- fizzbuzz functions to be called by user
-fizzbuzz_lc = fb [1..101]
-fizzbuzz_r = fb_r 1 102 []
-fizzbuzz_map = fb_map [1..103]
+fizzbuzz_lc   = fb [1..101]
+fizzbuzz_r    = fb_r 1 102 []
+fizzbuzz_map  = fb_map [1..103]
 fizzbuzz_high = fb_high [1..104]
 fizzbuzz_fold = fb_fold [1..105]
 
@@ -61,7 +61,10 @@ fb_map x_list = map fb_show x_list
 fb_high :: [Integer] -> [String]
 fb_high = map fb_show
 
--- using fold
+-- method 5: fold
+-- Recursively applies fb_show to each element in a list, starting at the 
+--     right-most element in that list, meanwhile appending the result
+--     to the left of an accumulator list.
 fb_fold :: (Integral a, Show a) => [a] -> [String] 
 fb_fold = foldr (\x acc -> (fb_show x) : acc) []
 
