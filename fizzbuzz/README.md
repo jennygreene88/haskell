@@ -21,7 +21,7 @@ Open the GHCi command line.
 Navigate to the fizzbuzz directory using the `cd` command, adjusting the path as necessary:
 
 ```
-:cd C:\Users\Me\Documents\haskell\fizzbuzz\
+:cd C:\...\Fizzbuzz\
 ```
 
 Load the `main.hs` module:
