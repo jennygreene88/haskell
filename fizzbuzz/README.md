@@ -18,7 +18,7 @@ The Fizz Buzz functions work fine. There is no end goal, so development will alw
 
 Open the GHCi command line.
 
-Navigate to the fizzbuzz directory using the `cd` command, adjusting the path as necessary:
+Navigate to the Fizzbuzz directory using the `cd` command, adjusting the path as necessary:
 
 ```
 :cd C:\...\Fizzbuzz\
