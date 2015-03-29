@@ -24,16 +24,16 @@ Navigate to the fizzbuzz directory using the `cd` command, adjusting the path as
 :cd C:\Users\Me\Documents\haskell\fizzbuzz\
 ```
 
-Load the `fizzbuzz.hs` module:
+Load the `main.hs` module:
 
 ```
-:l fizzbuzz
+:l main
 ```
 
 Run Fizz Buzz using list comprehension:
 
 ```
-fizzbuzz
+fizzbuzz_lc
 ```
 
 Run Fizz Buzz using recursion:
