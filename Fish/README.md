@@ -1,11 +1,11 @@
 
 # INTRODUCTION
 
-This project will be a code sample for Tsuru Capital
+This project will be a code sample for Fish Capital
 
 # TASK DESCRIPTION
 
-Last retrieved from (www.tsurucapital.com) on 2015-03-06.
+Last retrieved from (www.fishcapital.com) on 2015-03-06.
 
 ## Code Sample
 
@@ -31,7 +31,7 @@ You should assume that the difference between the quote accept time and the pcap
 
 ## Test Data
 
-A small sample file with a capture of the Kospi 200 market data feed from the first 30s of trading on 2011-02-16 can be downloaded [here](http://www.tsurucapital.com/file/mdf-kospi200.20110216-0.pcap.gz).
+A small sample file with a capture of the Kospi 200 market data feed from the first 30s of trading on 2011-02-16 can be downloaded [here](http://www.fishcapital.com/file/mdf-kospi200.20110216-0.pcap.gz).
 
 It is particularly important that your program runs just as efficiently on a small file as it does on a large file (8GB+), in terms of throughput and memory usage.
 
