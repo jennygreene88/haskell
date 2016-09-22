@@ -1,0 +1,27 @@
+
+OVERVIEW
+- parse and print quote messages from data feed
+- when invoked with -r flag, re-order messages according to the 'quote accept time' at the exchange.
+
+PARSING
+- data feed sent via UDP to ports 15515/15516.
+- pcap file supplied to parse UDP packets.
+- quote packets
+    + begin with ASCII bytes B6034
+    + contain five current best bids and offers (or 'asks') on the market.
+    + ignore anything else
+
+PRINTING
+- print:
+    + packet and quote accept time
+    + issue code
+    + bids from 5th to 1st
+    + asks from 1st to 5th
+
+REORDERING
+- output messages ordered by qutoe accept time
+- quote accept time and pcap packet time never differ more than 3 sec
+
+EFFICIENCY
+- large pcap file must be okay too (8GB+); throughput and memory usage.
+

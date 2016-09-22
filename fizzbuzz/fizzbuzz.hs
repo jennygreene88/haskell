@@ -3,7 +3,7 @@
 -- FizzBuzz
 --
 -- AUTHOR
---    Alan Kroner
+--    --
 --
 -- CREATED
 --    2015-03-01

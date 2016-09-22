@@ -1,0 +1,58 @@
+
+OVERVIEW
+- parse and print quote messages from data feed
+- when invoked with -r flag, re-order messages according to the 'quote accept time' at the exchange.
+- thoughts:
+    + "re-order" just means change how I select then next packet from my buffer.
+
+PARSING
+- data feed sent via UDP to ports 15515/15516.
+- pcap file supplied to parse UDP packets.
+- quote packets
+    + begin with ASCII bytes B6034
+    + contain five current best bids and offers (or 'asks') on the market.
+    + ignore any other packets
+- thoughts:
+    + need a daemon (d0) that reads pcap file and sends packets to those ports (on localhost).
+    + Reading pcap file cannot be done by loading entire pcap file into memory.
+    + need a daemon (d1) that listens for UDP packets, parses them, and prints them to screen.
+    + Main program starts (d1), then while watching (d1) start (d0)
+    + Parsing:
+        * verify starting bytes (B6034)
+        * extract quote accept time, bids, and asks.
+        * add accept-time, bids, asks to my buffer
+
+PRINTING
+- print:
+    + packet and quote accept time
+    + issue code
+    + bids from 5th to 1st
+    + asks from 1st to 5th
+- thoughts:
+    + easy. just print "current" packet
+
+REORDERING
+- output messages ordered by qutoe accept time
+- quote accept time and pcap packet time never differ more than 3 sec
+- thoughts:
+    + scan all orders in buffer and select "current" packet
+        1. oldest quote time
+        2. any packets older than 3 sec
+
+EFFICIENCY
+- large pcap file must be okay too (8GB+); throughput and memory usage.
+- thoughts:
+
+PROTOTYPE
+- read 1st line (byte?) of pcap file and print to screen, put to buffer
+- don't load whole file; keep bookmark?
+- flush buffer and send it when one packet retrieved
+- multithreading; one thread to receive bytes, one thread to send packet buffer
+- send 1st line (buffer?) of pcap file as UDP packet
+- Listen for UDP packets and print recieved packets to screen
+- ...
+- generate my own pcap file and test my program with that
+- put timers in loops to monitor how long it takes
+
+
+
