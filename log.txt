@@ -1,0 +1,6 @@
+
+(recent entries on top)
+
+
+2016-09-22
+-   Learning about I/O, do blocks.
