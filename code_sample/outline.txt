@@ -42,6 +42,8 @@ REORDERING
 EFFICIENCY
 - large pcap file must be okay too (8GB+); throughput and memory usage.
 - thoughts:
+    + "Learn You a Haskell" mentions putting Data.ByteString.Lazy into L2 cache (64K)
+    + http://www.haskell.org/ghc/docs/latest/html/libraries/bytestring/Data-ByteString-Lazy.html
 
 PROTOTYPE
 - read 1st line (byte?) of pcap file and print to screen, put to buffer
