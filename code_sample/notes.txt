@@ -1,6 +1,0 @@
-
-compile:
-    # ghc --make <filename>
-
-https://downloads.haskell.org/~ghc/latest/docs/html/libraries/
-

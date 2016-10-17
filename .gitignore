@@ -1,4 +1,6 @@
 *.swp
+private
+private/*
 
 dist
 cabal-dev
