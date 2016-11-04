@@ -6,11 +6,12 @@ import Data.Word
 import Data.List
 import Data.Maybe
 import qualified Data.ByteString.Lazy as BSL
---import qualified Data.ByteString.Lazy.Char8 as BSLC
+import qualified Data.ByteString.Lazy.Char8 as BSLC
 import System.Environment
 import System.IO
 -----------------
 import Parser
+--import Pcap
 -----------------
 -- Function outline: 
 --  Scan data stream for a packet
@@ -30,16 +31,10 @@ main = do
 
     -- Open pcap file into bytestream
     bs <- BSL.readFile pcap_file
+    -- trim global header
 
-    -- Get 
-    --putStrLn [get_next_char bs]
-    let headerChar = "B6034" 
-    let headerWord = sToW headerChar
-    let index = elemIndex' headerWord bs
-    case index of Just _ -> putStrLn (show index)
-                  Nothing -> putStrLn "Packet not found"
-    parseStream headerWord bs
-    
+    -- BSL.drop results in an endless loop.
+    BSLC.putStrLn (BSL.take 10000 bs)
 
 
     return ()
