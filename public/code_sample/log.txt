@@ -2,7 +2,7 @@
 (recent entries on top)
 
 2016-10-18
--   Git was giving certificate verification failed" error. Reset hardware and software clocks to
+-   Git was giving "certificate verification failed" error. Reset hardware and software clocks to
     correct time. Error went away.
 2016-09-27
 -   Learning about functors and monads.

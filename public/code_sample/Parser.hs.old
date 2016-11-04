@@ -1,0 +1,102 @@
+-- File:        Parser.hs
+-- Description: Module for parsing custom "quote packet" pcap file
+
+module Parser
+( Parser.elemIndex
+--, c_to_w
+, print_bs
+, get_next_n_char
+, get_next_char
+, get_next_packet
+, loopn
+) where
+
+import Data.Word
+import Data.Int
+import Data.List
+import Data.Maybe
+import System.Environment
+import System.IO
+import qualified Data.ByteString.Lazy as BSL
+import qualified Data.ByteString.Lazy.Char8 as BSLC
+
+
+
+-- elemIndex to find [Word8] in a ByteString
+-- TODO: Avoid elemIndex since it uses memchr(3)
+--
+-- Given a lazy ByteString, scan for the beginning of a quote packet.
+-- i = index of header
+-- Pull head char from ByteString. Compare that char to header[i].
+-- If it matches
+-- Then continue to next char and next index.
+-- Else
+--      If i == 1(first element)
+--      Then get next char
+--      Else reset i but keep current char.
+--elemIndex :: [Word8] -> BSL.ByteString -> (Maybe Int64)
+--elemIndex key bs = do
+--    let ki = 0  -- key index
+--    let ki64 = fromIntegral ki
+--    -- get index of first Word8
+--    let bsi = BSL.elemIndex (key!!ki64) bs   -- ByteString index is type Maybe Int64
+--
+--    -- Check if first byte of packet header was found.
+--    if bsi == Nothing   -- extract value from Maybe
+--    then Nothing        -- not found
+--    else do             -- found; see if the rest of the key follows
+--        () <- putStrLn $ show bsi
+--        let bsi64 = fromJust $ bsi
+--        let full_match = elemIndex' key (fromIntegral ki64 + 1) bs (bsi64 + 1) (fromIntegral $ length key)
+--        if full_match 
+--        then Just $ fromIntegral ki64
+--        else Nothing
+
+-- Return true if key[ki] aligns with bs[bsi] for all ki
+elemIndex' :: [Word8] -> Int64 -> BSL.ByteString -> Int64 -> Int64 -> Bool
+elemIndex' key ki bs bsi key_len = do
+    dummy <- putStrLn $ show ki
+    if ki == key_len -- reached end of key
+    then True
+    else
+        if (key `genericIndex` ki) == (BSL.index bs bsi) -- does key[ki] match bs[bsi]?
+        then elemIndex' key  (ki + 1) bs (bsi + 1) key_len -- continue to next Word8
+        else False
+
+-- convert [Char] to [Word8]
+--c_to_w :: [Char] -> [Word8]
+--c_to_w = 
+--    []
+
+--
+print_bs :: BSL.ByteString -> IO ()
+print_bs bs =
+    putStrLn (BSLC.unpack bs)
+
+--
+get_next_n_char :: BSL.ByteString -> Int -> String
+get_next_n_char bs n =
+    if n == 0
+    then []
+    else (BSLC.head bs):((get_next_n_char (BSL.tail bs)) (n - 1))
+
+--
+get_next_char :: BSL.ByteString -> Char
+get_next_char bs =
+    BSLC.head bs
+
+-- test
+get_next_packet :: BSL.ByteString -> String
+get_next_packet bs = do
+    let c = BSLC.head bs    -- grab 1st byte, convert to char
+    [c]
+
+-- test
+loopn :: IO () -> Int -> IO ()
+loopn action n =
+    if n == 0
+    then return ()
+    else do
+         action
+         loopn action (n - 1)
+
