@@ -2,6 +2,8 @@
 module Parser
 ( sToW
 , elemIndex'
+--, wordIsHere
+, parseStream
 ) where
 
 import qualified Data.Bool as Bool
@@ -29,6 +31,7 @@ elemIndex' w bs = do
                                          False -> elemIndex' w (BSL.tail bs)
 
 -- See if a [Word8] matches a particular section of a ByteString
+--
 -- Input parameters:
 --  w       string to search for
 --  i       current index of string
@@ -40,5 +43,18 @@ wordIsHere w i len bs k
     | i == ((fromIntegral len) :: Int64) = True                   -- Made to the end of the key without failing
     | w `genericIndex` i /= BSL.index bs k = False  -- this element does not match
     | otherwise = wordIsHere w (i+1) len bs (k+1)
+
+parseStream w bs = parseStream' w bs 1
+
+parseStream' :: [Word8] -> BSL.ByteString -> Int64 -> IO ()
+parseStream' w bs counter = do
+    let i = elemIndex' w bs
+    --putStrLn $ "i = " ++ (show (fromJust i))
+    case i of Nothing -> putStrLn "End of ByteString."
+              Just _ -> do
+                       putStrLn $ "Packet # " ++ (show counter)
+                       --putStrLn "packet info goes here"
+                       -- Using tail recursion can read the ByteString forever without filling up the stack
+                       parseStream' w (BSL.drop ((fromJust i)+1) bs) (counter + 1)
 
 

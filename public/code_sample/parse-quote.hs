@@ -18,7 +18,7 @@ import Parser
 --      If end of file reached, return.
 --      If not end of file, call scan function (tail recursion to save stack).
 main = do
-    let pcap_file = "packets.pcap"
+    let pcap_file = "packets.pcap" -- 99106 packets?
 
     -- arguments
     args <- getArgs
@@ -33,11 +33,12 @@ main = do
 
     -- Get 
     --putStrLn [get_next_char bs]
-    let header_ch = "B6034" 
-    let index = elemIndex' (sToW header_ch) bs
+    let headerChar = "B6034" 
+    let headerWord = sToW headerChar
+    let index = elemIndex' headerWord bs
     case index of Just _ -> putStrLn (show index)
                   Nothing -> putStrLn "Packet not found"
-    
+    parseStream headerWord bs
     
 
 
