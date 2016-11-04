@@ -1,6 +1,8 @@
 ================
 OPERATORS, KEYWORDS, COMMANDS, FUNCTIONS
 ================
+()
+    - The empty tuple is a value of () and it also has a type of ().
 (,)
     - Same as (\x y -> (x,y))
 (,,)
@@ -54,8 +56,10 @@ pure
     - wraps normal function up into (an applicative functor?)
     - function that wraps value up into a data type
 return
-    - makes an I/O action that doesn't do anything, just yields value as result, doesn't
-        do any I/O operations. Wraps the value in a context.
+    - Makes an I/O action that doesn't do anything, just yields value as result, doesn't
+        do any I/O operations.
+    - Wraps the value in an I/O context.
+    - Useful when you need I/O output but don't need to actually do anything.
 type
     - make new types
     - Examples:

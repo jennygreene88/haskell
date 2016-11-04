@@ -33,9 +33,13 @@ main = do
 
     -- Get 
     --putStrLn [get_next_char bs]
-    let header_ch = "B" -- "B6034" 
+    let header_ch = "B6034" 
     let index = elemIndex' (sToW header_ch) bs
     case index of Just _ -> putStrLn (show index)
-                  Nothing -> putStrLn "oh shit"
+                  Nothing -> putStrLn "Packet not found"
+    
+    
+
+
     return ()
 
