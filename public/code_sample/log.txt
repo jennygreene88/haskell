@@ -1,10 +1,19 @@
 
 (recent entries on top)
 
+2016-11-05
+- Created cabal sandbox
+    # apt-get install haskell-platform          <- haskell development platform; includes cabal
+    # cabal sandbox init                        <- create new cabal sandbox
+    # cabal update                              <- get latest list of libraries
+    # cabal install <package name>              <- install package
+
 2016-10-18
 -   Git was giving "certificate verification failed" error. Reset hardware and software clocks to
     correct time. Error went away.
+
 2016-09-27
 -   Learning about functors and monads.
+
 2016-09-22
 -   Learning about I/O, do blocks.

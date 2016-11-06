@@ -2,6 +2,7 @@
 -- Description:     Main program for Tsuru Capital code sample.
 
 import Control.Applicative
+import Data.Bool
 import Data.Word
 import Data.List
 import Data.Maybe
@@ -11,7 +12,6 @@ import System.Environment
 import System.IO
 -----------------
 import Parser
---import Pcap
 -----------------
 -- Function outline: 
 --  Scan data stream for a packet
@@ -33,9 +33,16 @@ main = do
     bs <- BSL.readFile pcap_file
     -- trim global header
 
-    -- BSL.drop results in an endless loop.
-    BSLC.putStrLn (BSL.take 10000 bs)
+    -- BSL.drop results in an endless loop; need to use recursion to trim a ByteString.
+    parseQuotes False bs
+    --putStrLn  "B6034"
+    --putStrLn $ (show $ elemIndex' (sToW "B6034") bs)
 
+    --let i = elemIndex' (sToW "B6034" ) bs
+    --case i of Nothing -> return ()
+    --          Just _  -> putStrLn (show (fromJust i ))
 
+    --test (sToW "B6034") bs
     return ()
+
 

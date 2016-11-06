@@ -7,6 +7,10 @@ OPERATORS, KEYWORDS, COMMANDS, FUNCTIONS
     - Same as (\x y -> (x,y))
 (,,)
     - A function that is the same as (\x y z -> (x,y,z))
+(!)
+    - Strict field in data constructor
+    - Examples:
+        + data Trade = Trade { timestamp :: !Word32} deriving (Show)
 (->)
     - A functor that ...
 (<$>)
