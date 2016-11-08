@@ -57,17 +57,23 @@ elemIndex' w bs = do
                    Just _  -> do
                         -- Found the first byte, so see if subsequent bytes are also there
                         let here = wordIsHere w len bs (fromJust firstI)
-                        case here of True -> firstI
-                                     False -> ((+) <$> firstI) <*> elemIndex' w (BSL.drop ((fromJust firstI)+1) bs)
+                        case here of
+                            -- Found the key here, so return the index
+                            True -> firstI        
+                            -- Skip to the "false positive" byte and continue searching after it.
+                            -- The "plus one"s were added to stop endless loops and keep the numbers accurate.
+                            --False -> ((+) <$> (firstI)) <*> elemIndex' w (BSL.drop ((fromJust firstI)+1) bs)
+                            False -> ((+) <$> (Just ((fromJust firstI)+1))) <*> elemIndex' w (BSL.drop ((fromJust firstI)+1) bs)
 
 -- See if a [Word8] matches a particular section of a ByteString
---
+{-|
 -- Input parameters:
 --  w       string to search for
 --  i       current index of string
 --  len     length of string
 --  bs      byte string to search in
 --  k       current index of bytestring; this is the "here"
+-}
 wordIsHere :: [Word8] -> Int -> BSL.ByteString -> Int64 -> Bool
 wordIsHere w len bs k = wordIsHere' w 0 len bs k
 
@@ -96,8 +102,6 @@ walk' w bs counter = do
 -- Returns: nothing
 parseQuotes :: Bool -> BSL.ByteString -> IO ()
 parseQuotes reorder bs = do
-    --        let time = runGet getPacketTime $ BSL.take 4 (fromJust (getPacketHeader bs)) 
-    --------------------------------------
     parseQuotes' reorder [] bs
 
 -- recursive version
@@ -131,6 +135,7 @@ parseQuotes' reorder quotes bs = do
 -- non reorder
 printQuote :: Quote -> IO ()
 printQuote q = do
+    {-|
     putStrLn $ show (sec q)
     putStrLn $ show (subSec q)
     putStrLn $ show (capLen q)
@@ -139,6 +144,8 @@ printQuote q = do
     BSLC.putStrLn (infoType q)
     BSLC.putStrLn (marketType q)
     BSLC.putStrLn (issueCode q)
+    -}
+    putStrLn (show q)
     return ()
 
 printQuotesReorder :: [Quote] -> Quote -> IO ()
@@ -148,6 +155,7 @@ printQuotesReorder quotes q = do
     -- print and flush packets 3 seconds older than "current" timestamp, starting with oldest
     return ()
 
+{-|
 -- Returns: ByteString containing (the next) entire packet header
 getPacketHeader :: BSL.ByteString -> Maybe BSL.ByteString
 getPacketHeader bs = do
@@ -161,27 +169,7 @@ getPacketHeader bs = do
             --trace ("len all = " ++ (show (BSL.length all))) Nothing
             --trace ("header: " ++ (show (BSLC.unpack all))) Nothing
             Just (BSL.drop ((fromJust dataStart) - 16) all)
-
--- Given a 16-bit packet header ByteString, extract the timestamp value.
---getPacketTime :: BSL.ByteString -> Maybe Int64
-getPacketTime :: Get Int32
-getPacketTime = do
-    --trace ("header passed to getPacketTime: " ++ (BSLC.unpack bs) ++ "\n") Nothing
-    --let t = BSL.take 8 bs
-    --let ts = BSLC.unpack t
-    --trace ts (Just 0) 
-    --let tsq = "\"" ++ ts ++ "\""
-    --trace ("time bytes: " ++ tsq) (Just 0) 
-    --let tsr = (readMaybe tsq :: Maybe Int64)
-    --case tsr of
-    --    Nothing -> Nothing
-    --    Just _  -> tsr
-    -------------------------------------------
-    --let td = ((decode t) :: Int32)
-    --Just ((fromIntegral td) :: Int64)
-    -------------------------------------------
-    a <- getWord32le
-    return ((fromIntegral a) :: Int32)
+-}
 
 -- Returns: ByteString containing (the next) packet data
 getPacketData :: BSL.ByteString -> BSL.ByteString
@@ -211,11 +199,12 @@ getNextQuote bs = do
             --trace (show bsQuote) (Nothing)
             Just ( runGet makeQuote bsQuote )
 
--- fill up Quote
--- i is start of packet header 
+{-| fill up Quote
+    There is probably a better way to do this, but this is what I know works.
+-}
 makeQuote :: Get Quote
 makeQuote = do
-    s   <- fmap fromIntegral getWord32le 
+    s   <- getWord32le --fmap fromIntegral getWord32le 
     ss  <- getWord32le
     cl  <- getWord32le
     ul  <- getWord32le
@@ -223,6 +212,44 @@ makeQuote = do
     it  <- getLazyByteString 2 -- getWord16le
     mt  <- getLazyByteString 1 -- getWord8
     ic  <- getLazyByteString 12
+    is  <- getLazyByteString 3
+    mst  <- getLazyByteString 2
+    tbqv  <- getLazyByteString 7
+    bbp1  <- getLazyByteString 5
+    bbq1  <- getLazyByteString 7
+    bbp2  <- getLazyByteString 5
+    bbq2  <- getLazyByteString 7
+    bbp3  <- getLazyByteString 5
+    bbq3  <- getLazyByteString 7
+    bbp4  <- getLazyByteString 5
+    bbq4  <- getLazyByteString 7
+    bbp5  <- getLazyByteString 5
+    bbq5  <- getLazyByteString 7
+    taqv  <- getLazyByteString 7
+    bap1  <- getLazyByteString 5
+    baq1  <- getLazyByteString 7
+    bap2  <- getLazyByteString 5
+    baq2  <- getLazyByteString 7
+    bap3  <- getLazyByteString 5
+    baq3  <- getLazyByteString 7
+    bap4  <- getLazyByteString 5
+    baq4  <- getLazyByteString 7
+    bap5  <- getLazyByteString 5
+    baq5  <- getLazyByteString 7
+    nbbvqt  <- getLazyByteString 5
+    nbbq1  <- getLazyByteString 4
+    nbbq2  <- getLazyByteString 4
+    nbbq3  <- getLazyByteString 4
+    nbbq4  <- getLazyByteString 4
+    nbbq5  <- getLazyByteString 4
+    nbavqt  <- getLazyByteString 5
+    nbaq1  <- getLazyByteString 4
+    nbaq2  <- getLazyByteString 4
+    nbaq3  <- getLazyByteString 4
+    nbaq4  <- getLazyByteString 4
+    nbaq5  <- getLazyByteString 4
+    qat     <- getWord64le -- getLazyByteString 8
+    eom  <- getLazyByteString 1
 
     return Quote{
          sec            = s
@@ -233,6 +260,45 @@ makeQuote = do
         ,infoType       = it
         ,marketType     = mt
         ,issueCode      = ic
+        ,issueSeq       = is
+        ,markStatType   = mst
+        ,totBidQVol     = tbqv
+        ,bestBidP1      = bbp1
+        ,bestBidQ1      = bbq1
+        ,bestBidP2      = bbp2
+        ,bestBidQ2      = bbq2
+        ,bestBidP3      = bbp3
+        ,bestBidQ3      = bbq3
+        ,bestBidP4      = bbp4
+        ,bestBidQ4      = bbq4
+        ,bestBidP5      = bbp5
+        ,bestBidQ5      = bbq5
+        ,totAskQVol     = taqv
+        ,bestAskP1      = bap1
+        ,bestAskQ1      = baq1
+        ,bestAskP2      = bap2
+        ,bestAskQ2      = baq2
+        ,bestAskP3      = bap3
+        ,bestAskQ3      = baq3
+        ,bestAskP4      = bap4
+        ,bestAskQ4      = baq4
+        ,bestAskP5      = bap5
+        ,bestAskQ5      = baq5
+        ,noBestBidValidQTot = nbbvqt
+        ,noBestBidQ1    = nbbq1
+        ,noBestBidQ2    = nbbq2
+        ,noBestBidQ3    = nbbq3
+        ,noBestBidQ4    = nbbq4
+        ,noBestBidQ5    = nbbq5
+        ,noBestAskValidQTot = nbavqt
+        ,noBestAskQ1    = nbaq1
+        ,noBestAskQ2    = nbaq2
+        ,noBestAskQ3    = nbaq3
+        ,noBestAskQ4    = nbaq4
+        ,noBestAskQ5    = nbaq5
+        ,quoteAcceptTime = qat
+        ,endOfMessage   = eom
+       
         }
 
 

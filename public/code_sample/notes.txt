@@ -1,5 +1,9 @@
 
-pcap article
+friendly pcap viewer
+ tcpdump -c 1 -qns 0 -A -r packets.pcap
+
+pcap articles
+http://manpages.ubuntu.com/manpages/wily/man5/pcap-savefile.5.html
 http://www.kroosec.com/2012/10/a-look-at-pcap-file-format.html
 
 library documentation
