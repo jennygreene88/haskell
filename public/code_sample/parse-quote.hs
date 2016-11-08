@@ -25,24 +25,20 @@ main = do
     args <- getArgs
     putStrLn "args:"
     mapM_ putStrLn args
-    if elem "-r" args
-    then putStrLn "REORDER"
-    else putStrLn ""
 
-    -- Open pcap file into bytestream
     bs <- BSL.readFile pcap_file
-    -- trim global header
+
+    if elem "-r" args
+    then do
+        parseQuotes True bs
+    else do
+        parseQuotes False bs
 
     -- BSL.drop results in an endless loop; need to use recursion to trim a ByteString.
-    parseQuotes False bs
-    --putStrLn  "B6034"
+    --parseQuotes False bs
+
     --putStrLn $ (show $ elemIndex' (sToW "B6034") bs)
 
-    --let i = elemIndex' (sToW "B6034" ) bs
-    --case i of Nothing -> return ()
-    --          Just _  -> putStrLn (show (fromJust i ))
-
-    --test (sToW "B6034") bs
     return ()
 
 

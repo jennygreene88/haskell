@@ -1,9 +1,6 @@
 
 module Parser
 ( parseQuotes
-, printQuotes
-, getNextPacketIndex
-, getNextPacket
 ) where
 
 import Control.Applicative
@@ -15,6 +12,7 @@ import qualified Data.ByteString.Lazy.Char8 as BSLC
 import Data.Int
 import Data.Maybe
 import Data.List
+import Data.Text.Encoding
 import Data.Word
 import Debug.Trace
 import Text.Read
@@ -98,44 +96,53 @@ walk' w bs counter = do
 -- Returns: nothing
 parseQuotes :: Bool -> BSL.ByteString -> IO ()
 parseQuotes reorder bs = do
-    --let header = getPacketHeader bs
-    --case header of
-    --    Nothing -> putStrLn "header not found"
-    --    Just _  -> do
     --        let time = runGet getPacketTime $ BSL.take 4 (fromJust (getPacketHeader bs)) 
-    --        putStrLn $ show time
     --------------------------------------
     parseQuotes' reorder [] bs
 
-parseQuotes' :: Bool -> [a] -> BSL.ByteString -> IO ()
+-- recursive version
+-- Walks through the ByteString, looks for quotes, and does stuff with them.
+parseQuotes' :: Bool -> [Quote] -> BSL.ByteString -> IO ()
 parseQuotes' reorder quotes bs = do
-    let i = getNextPacketIndex bs
-    case i of
-        Nothing -> putStrLn "\nNo packets found.\n"
-        Just _  -> do
-            let newPacket = getNextPacket (fromJust i) bs -- returns Maybe Quote
-            case reorder of
-                -- unordered
-                False -> do
-                    return ()
-                -- reorder
-                True -> do
-                    case newPacket of
-                        Nothing -> do
-                            -- flush remaining packets
-                            putStrLn "\n<EOF>\n"
-                        Just _  -> do
-                            -- print quotes
-                            trace "printing quotes..." (return ())
-                            printQuotes quotes newPacket
-                            parseQuotes' reorder quotes (BSL.drop (fromJust i) bs)
+    case reorder of
+        -- unordered
+        False -> do
+            let q = getNextQuote bs
+            case q of
+                Nothing -> putStrLn "\nNo quotes found.\n"
+                Just _  -> do
+                    printQuote (fromJust q)
+        -- reorder
+        True -> do
+            let q = getNextQuote bs
+            case q of
+                Nothing -> do
+                    -- flush remaining packets
+                    putStrLn "\n<EOF>\n"
+                Just _  -> do
+                    -- print quotes
+                    trace "printing quotes..." (return ())
+                    printQuotesReorder quotes (fromJust q)
+                    let i = getNextPacketIndex bs
+                    case i of 
+                        Nothing -> putStrLn "<EOF>"
+                        Just _  -> parseQuotes' reorder quotes (BSL.drop (fromJust i) bs) -- TODO add the length of the packet
 
-printQuotes :: [a] -> a -> IO ()
-printQuotes quotes newPacket = do
+-- non reorder
+printQuote :: Quote -> IO ()
+printQuote q = do
+    putStrLn $ show (sec q)
+    putStrLn $ show (subSec q)
+    putStrLn $ show (capLen q)
+    putStrLn $ show (untruncLen q)
+    BSLC.putStrLn (dataType q)
+    BSLC.putStrLn (infoType q)
+    BSLC.putStrLn (marketType q)
+    BSLC.putStrLn (issueCode q)
     return ()
 
-printQuotesReorder :: [a] -> a -> IO ()
-printQuotesReorder quotes newPacket = do
+printQuotesReorder :: [Quote] -> Quote -> IO ()
+printQuotesReorder quotes q = do
     -- grab "current" timestamp from newPacket
     -- add newPacket to quotes
     -- print and flush packets 3 seconds older than "current" timestamp, starting with oldest
@@ -180,16 +187,53 @@ getPacketTime = do
 getPacketData :: BSL.ByteString -> BSL.ByteString
 getPacketData bs = bs
 
--- *
+-- returns the index of the first byte in a ByteStream of a quote packet's header.
 getNextPacketIndex :: BSL.ByteString -> Maybe Int64
 getNextPacketIndex bs = do
-    let i = elemIndex' "B6034" bs
+    let i = elemIndex' (sToW "B6034") bs
     case i of
-        False -> Nothing
-        True  -> Just (i - 16) -- TODO error handling for invalid index
+        Nothing -> Nothing
+        -- include the header
+        Just _  -> Just ((fromJust i) - 16)  --Just (i - 16) -- TODO error handling for invalid index
 
--- *
-getNextPacket :: Int64 -> BSL.ByteString -> Maybe TsuruQuote.Quote
-getNextPacket i bs = do
-    let q = TsuruQuote.Quote {test=sToW("1111")}
-    q
+getNextQuote :: BSL.ByteString -> Maybe Quote
+getNextQuote bs = do
+    -- isolate the ByteStream we need and feed it into a Quote.
+    let i = getNextPacketIndex bs
+    --trace (show i) (Nothing) -- OK 335
+
+    --let bsQuote = BSL.take (16 + 215) bs
+    case i of
+        Nothing -> Nothing
+        Just _  -> do
+            let bsQuoteStart = BSL.drop (fromJust i) bs
+            let bsQuote = BSL.take (16 + 215) bsQuoteStart
+            --trace (show bsQuote) (Nothing)
+            Just ( runGet makeQuote bsQuote )
+
+-- fill up Quote
+-- i is start of packet header 
+makeQuote :: Get Quote
+makeQuote = do
+    s   <- fmap fromIntegral getWord32le 
+    ss  <- getWord32le
+    cl  <- getWord32le
+    ul  <- getWord32le
+    dt  <- getLazyByteString 2
+    it  <- getLazyByteString 2 -- getWord16le
+    mt  <- getLazyByteString 1 -- getWord8
+    ic  <- getLazyByteString 12
+
+    return Quote{
+         sec            = s
+        ,subSec         = ss
+        ,capLen         = cl
+        ,untruncLen     = ul
+        ,dataType       = dt
+        ,infoType       = it
+        ,marketType     = mt
+        ,issueCode      = ic
+        }
+
+
+

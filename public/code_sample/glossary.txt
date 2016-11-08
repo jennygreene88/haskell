@@ -1,12 +1,19 @@
-================
+========================================
 OPERATORS, KEYWORDS, COMMANDS, FUNCTIONS
-================
+========================================
+
 ()
     - The empty tuple is a value of () and it also has a type of ().
 (,)
     - Same as (\x y -> (x,y))
 (,,)
     - A function that is the same as (\x y z -> (x,y,z))
+(:-:)
+    - Fixity declaration. Used when defining a function as an operator to give them a fixity.
+    - Order of operations.
+    - Examples:
+        + infixl 7 *        * has fixity of 7 and is left-associative.
+        + infixl 6 +        + has fixity of 6 and is left-associative.
 (!)
     - Strict field in data constructor
     - Examples:
@@ -44,8 +51,15 @@ class
             (/=) :: a -> a -> Bool  
             x == y = not (x /= y)  
             x /= y = not (x == y)
+cons
+    - synonym for :
+data
+    - Defines new (data) type with a data constructor.
+    - Use the `instance' keyword to make a type an instance of a typeclass.
 do
     - Take several I/O actions and glue them into one
+instance
+    - Makes a type an instance of a typeclass.
 Monad
     - A typeclass that...
     - type class:
@@ -65,15 +79,16 @@ return
     - Wraps the value in an I/O context.
     - Useful when you need I/O output but don't need to actually do anything.
 type
+    - Type constructor.
     - make new types
     - Examples:
         type Birds = Int            <- type synonym for Int called eBirds'
         type Pole = (Birds,Birds)
 
 
-================
+========================================
 TERMS, CONCEPTS
-================
+========================================
 action
     - Goes out and brings something back in a box
     - Examples:
@@ -118,6 +133,17 @@ lifting a function
     - taking a function (a -> b) and returning (f a -> f b) where f is a functor.
 monad
     - applicative functor that supports the bind (>>=) function.
+record
+    - Examples:
+        + data Person = Person String String Int Float String String deriving (Show)  
+        + With record syntax: 
+              data Person = Person { firstName :: String  
+                                   , lastName :: String  
+                                   , age :: Int  
+                                   , height :: Float  
+                                   , phoneNumber :: String  
+                                   , flavor :: String  
+                                   } deriving (Show)  
 type
     - examples:
         + Int
@@ -135,8 +161,13 @@ type constructor
     - instance of a type constructor is called "concrete type"
     - examples:
         + (->) r a
-        + definition of Either
         + data Maybe a = Nothing | Just a
+            a is type parameter
+            Since there is a type parameter, Maybe is a type constructor.
+type synonym
+    - Can be parameterized.
+    - Examples:
+        + type String = [Char]
 value constructor
     - takes value parameter(s) and produces a new value
 
