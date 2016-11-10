@@ -13,8 +13,11 @@ import Data.Int
 import Data.Maybe
 import Data.List
 import Data.Text.Encoding
+import Data.Time.Format
 import Data.Word
 import Debug.Trace
+import Numeric
+import Text.Printf
 import Text.Read
 -----------------
 import TsuruQuote
@@ -108,48 +111,123 @@ parseQuotes reorder bs = do
 -- Walks through the ByteString, looks for quotes, and does stuff with them.
 parseQuotes' :: Bool -> [Quote] -> BSL.ByteString -> IO ()
 parseQuotes' reorder quotes bs = do
-    case reorder of
-        -- unordered
-        False -> do
-            let q = getNextQuote bs
-            case q of
-                Nothing -> putStrLn "\nNo quotes found.\n"
-                Just _  -> do
-                    printQuote (fromJust q)
-        -- reorder
-        True -> do
-            let q = getNextQuote bs
-            case q of
-                Nothing -> do
-                    -- flush remaining packets
-                    putStrLn "\n<EOF>\n"
-                Just _  -> do
-                    -- print quotes
-                    trace "printing quotes..." (return ())
-                    printQuotesReorder quotes (fromJust q)
-                    let i = getNextPacketIndex bs
-                    case i of 
-                        Nothing -> putStrLn "<EOF>"
-                        Just _  -> parseQuotes' reorder quotes (BSL.drop (fromJust i) bs) -- TODO add the length of the packet
+    let i = getNextPacketIndex bs -- TODO maybe this function should only be used in getNextPacket
+    case i of 
+        Nothing -> putStrLn "<EOF>"
+        Just _  -> do
+            case reorder of
+                -- unordered
+                False -> do
+                    let q = getNextQuote bs
+                    case q of
+                        Nothing -> putStrLn "\nNo quotes found.\n"
+                        Just _  -> do
+                            printQuote (fromJust q)
+                            parseQuotes' reorder quotes (BSL.drop 215 bs) -- TODO use a better number
+                -- reorder
+                True -> do
+                    let q = getNextQuote bs
+                    case q of
+                        Nothing -> do
+                            -- flush remaining packets
+                            putStrLn "\n<EOF>\n"
+                        Just _  -> do
+                            -- print quotes
+                            trace "printing quotes..." (return ())
+                            printQuotesReorder quotes (fromJust q)
+                            parseQuotes' reorder quotes (BSL.drop (fromJust i) bs) -- TODO add the length of the packet
 
 -- non reorder
 printQuote :: Quote -> IO ()
 printQuote q = do
-    {-|
-    putStrLn $ show (sec q)
-    putStrLn $ show (subSec q)
-    putStrLn $ show (capLen q)
-    putStrLn $ show (untruncLen q)
-    BSLC.putStrLn (dataType q)
-    BSLC.putStrLn (infoType q)
-    BSLC.putStrLn (marketType q)
-    BSLC.putStrLn (issueCode q)
+    -- Simple error checking
+    --putStrLn $ show $ dataType q
+    if (show $ dataType q) == show "B6" 
+    then do
+        --putStrLn (show q)
+        putStr $ show (sec q)   -- TODO: pretty print this date/time
+        putStr "."
+        putStr $ show (subSec q)
+        putStr " "
+        putStr $ wToS $ [BSL.index (qAccTime q) 0]
+        putStr $ wToS $ [BSL.index (qAccTime q) 1]
+        putStr ":"
+        putStr $ wToS $ [BSL.index (qAccTime q) 2]
+        putStr $ wToS $ [BSL.index (qAccTime q) 3]
+        putStr ":"
+        putStr $ wToS $ [BSL.index (qAccTime q) 4]
+        putStr $ wToS $ [BSL.index (qAccTime q) 5]
+        putStr ":"
+        putStr $ wToS $ [BSL.index (qAccTime q) 6]
+        putStr $ wToS $ [BSL.index (qAccTime q) 7]
+        putStr " "
+        BSLC.putStr (issueCode q) 
+        putStr " "
+        BSLC.putStr (bestBidQ5 q)
+        putStr "@"
+        BSLC.putStr (bestBidP5 q)
+        putStr " "
+        BSLC.putStr (bestBidQ4 q)
+        putStr "@"
+        BSLC.putStr (bestBidP4 q)
+        putStr " "
+        BSLC.putStr (bestBidQ3 q)
+        putStr "@"
+        BSLC.putStr (bestBidP3 q)
+        putStr " "
+        BSLC.putStr (bestBidQ2 q)
+        putStr "@"
+        BSLC.putStr (bestBidP2 q)
+        putStr " "
+        BSLC.putStr (bestBidQ1 q)
+        putStr "@"
+        BSLC.putStr (bestBidP1 q)
+        putStr " "
+        BSLC.putStr (bestAskQ1 q)
+        putStr "@"
+        BSLC.putStr (bestAskP1 q)
+        putStr " "
+        BSLC.putStr (bestAskQ2 q)
+        putStr "@"
+        BSLC.putStr (bestAskP2 q)
+        putStr " "
+        BSLC.putStr (bestAskQ3 q)
+        putStr "@"
+        BSLC.putStr (bestAskP3 q)
+        putStr " "
+        BSLC.putStr (bestAskQ4 q)
+        putStr "@"
+        BSLC.putStr (bestAskP4 q)
+        putStr " "
+        BSLC.putStr (bestAskQ5 q)
+        putStr "@"
+        BSLC.putStr (bestAskP5 q)
+        putStr "\n\n"
+        
+    else putStrLn "[invalid packet ????????????????????]\n"
+    
+
+    {-|  
+      putStr $ "\npacket " ++ (show $ ( fromIntegral (sec q) :: Int32 ) ) -- for Word32le
+    --putStr $ "\npacket "++(show $ sec q)                              -- for Int32
+    putStr $ ":"++(show $ subSec q)
+    putStr $ "     QAT "++(show $ quoteAcceptTimeHH q)
+    putStr $ ":"++(show $ quoteAcceptTimeMM q)
+    putStr $ ":"++(show $ quoteAcceptTimeSS q)
+    putStr $ ":"++(show $ quoteAcceptTimeuu q)
+    putStr "      "
+    BSLC.putStr ( BSL.pack $ sToW $ show $ subSec q)
     -}
-    putStrLn (show q)
+
     return ()
+
+--printQuoteAscii :: Quote -> IO ()
+--printQuoteAscii q = do
+--    putStrLn $ wToS $ BSL.unpack $ sec q
 
 printQuotesReorder :: [Quote] -> Quote -> IO ()
 printQuotesReorder quotes q = do
+
     -- grab "current" timestamp from newPacket
     -- add newPacket to quotes
     -- print and flush packets 3 seconds older than "current" timestamp, starting with oldest
@@ -175,14 +253,14 @@ getPacketHeader bs = do
 getPacketData :: BSL.ByteString -> BSL.ByteString
 getPacketData bs = bs
 
--- returns the index of the first byte in a ByteStream of a quote packet's header.
+-- returns the index of the first byte of a packet in a ByteStream 
 getNextPacketIndex :: BSL.ByteString -> Maybe Int64
 getNextPacketIndex bs = do
     let i = elemIndex' (sToW "B6034") bs
     case i of
         Nothing -> Nothing
         -- include the header
-        Just _  -> Just ((fromJust i) - 16)  --Just (i - 16) -- TODO error handling for invalid index
+        Just _  -> Just ((fromJust i) - 16 - 42)  --Just (i - 16) -- TODO error handling for invalid index
 
 getNextQuote :: BSL.ByteString -> Maybe Quote
 getNextQuote bs = do
@@ -195,7 +273,7 @@ getNextQuote bs = do
         Nothing -> Nothing
         Just _  -> do
             let bsQuoteStart = BSL.drop (fromJust i) bs
-            let bsQuote = BSL.take (16 + 215) bsQuoteStart
+            let bsQuote = BSL.take (16 + 42 + 215) bsQuoteStart
             --trace (show bsQuote) (Nothing)
             Just ( runGet makeQuote bsQuote )
 
@@ -204,58 +282,61 @@ getNextQuote bs = do
 -}
 makeQuote :: Get Quote
 makeQuote = do
-    s   <- getWord32le --fmap fromIntegral getWord32le 
-    ss  <- getWord32le
-    cl  <- getWord32le
-    ul  <- getWord32le
-    dt  <- getLazyByteString 2
-    it  <- getLazyByteString 2 -- getWord16le
-    mt  <- getLazyByteString 1 -- getWord8
-    ic  <- getLazyByteString 12
-    is  <- getLazyByteString 3
-    mst  <- getLazyByteString 2
-    tbqv  <- getLazyByteString 7
-    bbp1  <- getLazyByteString 5
-    bbq1  <- getLazyByteString 7
-    bbp2  <- getLazyByteString 5
-    bbq2  <- getLazyByteString 7
-    bbp3  <- getLazyByteString 5
-    bbq3  <- getLazyByteString 7
-    bbp4  <- getLazyByteString 5
-    bbq4  <- getLazyByteString 7
-    bbp5  <- getLazyByteString 5
-    bbq5  <- getLazyByteString 7
-    taqv  <- getLazyByteString 7
-    bap1  <- getLazyByteString 5
-    baq1  <- getLazyByteString 7
-    bap2  <- getLazyByteString 5
-    baq2  <- getLazyByteString 7
-    bap3  <- getLazyByteString 5
-    baq3  <- getLazyByteString 7
-    bap4  <- getLazyByteString 5
-    baq4  <- getLazyByteString 7
-    bap5  <- getLazyByteString 5
-    baq5  <- getLazyByteString 7
+    s       <- getWord32le -- Using getInt32le reverses bytes 
+    ss      <- getWord32le
+    cl      <- getLazyByteString 4 -- getWord32le
+    ul      <- getLazyByteString 4 --getWord32le
+    o       <- getLazyByteString 42 -- other packet info
+    dt      <- getLazyByteString 2
+    it      <- getLazyByteString 2 -- getWord16le
+    mt      <- getLazyByteString 1 -- getWord8
+    ic      <- getLazyByteString 12
+    is      <- getLazyByteString 3
+    mst     <- getLazyByteString 2
+    tbqv    <- getLazyByteString 7
+    bbp1    <- getLazyByteString 5
+    bbq1    <- getLazyByteString 7
+    bbp2    <- getLazyByteString 5
+    bbq2    <- getLazyByteString 7
+    bbp3    <- getLazyByteString 5
+    bbq3    <- getLazyByteString 7
+    bbp4    <- getLazyByteString 5
+    bbq4    <- getLazyByteString 7
+    bbp5    <- getLazyByteString 5
+    bbq5    <- getLazyByteString 7
+    taqv    <- getLazyByteString 7
+    bap1    <- getLazyByteString 5
+    baq1    <- getLazyByteString 7
+    bap2    <- getLazyByteString 5
+    baq2    <- getLazyByteString 7
+    bap3    <- getLazyByteString 5
+    baq3    <- getLazyByteString 7
+    bap4    <- getLazyByteString 5
+    baq4    <- getLazyByteString 7
+    bap5    <- getLazyByteString 5
+    baq5    <- getLazyByteString 7
     nbbvqt  <- getLazyByteString 5
-    nbbq1  <- getLazyByteString 4
-    nbbq2  <- getLazyByteString 4
-    nbbq3  <- getLazyByteString 4
-    nbbq4  <- getLazyByteString 4
-    nbbq5  <- getLazyByteString 4
+    nbbq1   <- getLazyByteString 4
+    nbbq2   <- getLazyByteString 4
+    nbbq3   <- getLazyByteString 4
+    nbbq4   <- getLazyByteString 4
+    nbbq5   <- getLazyByteString 4
     nbavqt  <- getLazyByteString 5
-    nbaq1  <- getLazyByteString 4
-    nbaq2  <- getLazyByteString 4
-    nbaq3  <- getLazyByteString 4
-    nbaq4  <- getLazyByteString 4
-    nbaq5  <- getLazyByteString 4
-    qat     <- getWord64le -- getLazyByteString 8
-    eom  <- getLazyByteString 1
+    nbaq1   <- getLazyByteString 4
+    nbaq2   <- getLazyByteString 4
+    nbaq3   <- getLazyByteString 4
+    nbaq4   <- getLazyByteString 4
+    nbaq5   <- getLazyByteString 4
+    -- quote accept time
+    qat     <- getLazyByteString 8
+    eom     <- getLazyByteString 1
 
     return Quote{
-         sec            = s
+        sec             = s
         ,subSec         = ss
         ,capLen         = cl
         ,untruncLen     = ul
+        ,other          = o
         ,dataType       = dt
         ,infoType       = it
         ,marketType     = mt
@@ -271,33 +352,33 @@ makeQuote = do
         ,bestBidQ3      = bbq3
         ,bestBidP4      = bbp4
         ,bestBidQ4      = bbq4
-        ,bestBidP5      = bbp5
-        ,bestBidQ5      = bbq5
-        ,totAskQVol     = taqv
-        ,bestAskP1      = bap1
-        ,bestAskQ1      = baq1
-        ,bestAskP2      = bap2
-        ,bestAskQ2      = baq2
-        ,bestAskP3      = bap3
-        ,bestAskQ3      = baq3
-        ,bestAskP4      = bap4
-        ,bestAskQ4      = baq4
-        ,bestAskP5      = bap5
-        ,bestAskQ5      = baq5
+        ,bestBidP5          = bbp5
+        ,bestBidQ5          = bbq5
+        ,totAskQVol         = taqv
+        ,bestAskP1          = bap1
+        ,bestAskQ1          = baq1
+        ,bestAskP2          = bap2
+        ,bestAskQ2          = baq2
+        ,bestAskP3          = bap3
+        ,bestAskQ3          = baq3
+        ,bestAskP4          = bap4
+        ,bestAskQ4          = baq4
+        ,bestAskP5          = bap5
+        ,bestAskQ5          = baq5
         ,noBestBidValidQTot = nbbvqt
-        ,noBestBidQ1    = nbbq1
-        ,noBestBidQ2    = nbbq2
-        ,noBestBidQ3    = nbbq3
-        ,noBestBidQ4    = nbbq4
-        ,noBestBidQ5    = nbbq5
+        ,noBestBidQ1        = nbbq1
+        ,noBestBidQ2        = nbbq2
+        ,noBestBidQ3        = nbbq3
+        ,noBestBidQ4        = nbbq4
+        ,noBestBidQ5        = nbbq5
         ,noBestAskValidQTot = nbavqt
-        ,noBestAskQ1    = nbaq1
-        ,noBestAskQ2    = nbaq2
-        ,noBestAskQ3    = nbaq3
-        ,noBestAskQ4    = nbaq4
-        ,noBestAskQ5    = nbaq5
-        ,quoteAcceptTime = qat
-        ,endOfMessage   = eom
+        ,noBestAskQ1        = nbaq1
+        ,noBestAskQ2        = nbaq2
+        ,noBestAskQ3        = nbaq3
+        ,noBestAskQ4        = nbaq4
+        ,noBestAskQ5        = nbaq5
+        ,qAccTime           = qat
+        ,endOfMessage       = eom
        
         }
 

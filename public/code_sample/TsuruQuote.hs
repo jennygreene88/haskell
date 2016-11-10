@@ -11,10 +11,11 @@ import Data.Word
 -- Value constructor names have to start with a capital letter
 -- Do I need to add strict?
 data Quote = Quote { 
-    sec             :: Word32
-    ,subSec         :: Word32
-    ,capLen         :: Word32
-    ,untruncLen     :: Word32
+     sec            :: Word32 --Int32
+    ,subSec         :: Word32 --Int32
+    ,capLen         :: BSL.ByteString -- Word32
+    ,untruncLen     :: BSL.ByteString -- Word32
+    ,other          :: BSL.ByteString -- 
     ,dataType       :: BSL.ByteString
     ,infoType       :: BSL.ByteString   --Word16
     ,marketType     :: BSL.ByteString   --Word8
@@ -40,23 +41,23 @@ data Quote = Quote {
     ,bestAskP3      :: BSL.ByteString
     ,bestAskQ3      :: BSL.ByteString
     ,bestAskP4      :: BSL.ByteString
-    ,bestAskQ4      :: BSL.ByteString
-    ,bestAskP5      :: BSL.ByteString
-    ,bestAskQ5      :: BSL.ByteString
-    ,noBestBidValidQTot     :: BSL.ByteString
-    ,noBestBidQ1    :: BSL.ByteString
-    ,noBestBidQ2    :: BSL.ByteString
-    ,noBestBidQ3    :: BSL.ByteString
-    ,noBestBidQ4    :: BSL.ByteString
-    ,noBestBidQ5    :: BSL.ByteString
-    ,noBestAskValidQTot     :: BSL.ByteString
-    ,noBestAskQ1    :: BSL.ByteString
-    ,noBestAskQ2    :: BSL.ByteString
-    ,noBestAskQ3    :: BSL.ByteString
-    ,noBestAskQ4    :: BSL.ByteString
-    ,noBestAskQ5    :: BSL.ByteString
-    ,quoteAcceptTime    :: Word64 --BSL.ByteString
-    ,endOfMessage   :: BSL.ByteString
+    ,bestAskQ4          :: BSL.ByteString
+    ,bestAskP5          :: BSL.ByteString
+    ,bestAskQ5          :: BSL.ByteString
+    ,noBestBidValidQTot :: BSL.ByteString
+    ,noBestBidQ1        :: BSL.ByteString
+    ,noBestBidQ2        :: BSL.ByteString
+    ,noBestBidQ3        :: BSL.ByteString
+    ,noBestBidQ4        :: BSL.ByteString
+    ,noBestBidQ5        :: BSL.ByteString
+    ,noBestAskValidQTot :: BSL.ByteString
+    ,noBestAskQ1        :: BSL.ByteString
+    ,noBestAskQ2        :: BSL.ByteString
+    ,noBestAskQ3        :: BSL.ByteString
+    ,noBestAskQ4        :: BSL.ByteString
+    ,noBestAskQ5        :: BSL.ByteString
+    ,qAccTime           :: BSL.ByteString
+    ,endOfMessage       :: BSL.ByteString
     } deriving (Show)
 
 
