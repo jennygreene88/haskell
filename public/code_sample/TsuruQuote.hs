@@ -13,7 +13,8 @@ import Data.Word
 data Quote = Quote { 
     packetTimeS     :: Word32
     ,packetTimeSS   :: Word32
-    ,packetTimeMS   :: Int64
+    --,packetTimeMS   :: Int64
+    ,packetMSToday  :: Int64
     ,capLen         :: BSL.ByteString -- Word32
     ,untruncLen     :: BSL.ByteString -- Word32
     ,other          :: BSL.ByteString -- 
@@ -57,7 +58,8 @@ data Quote = Quote {
     ,noBestAskQ3        :: BSL.ByteString
     ,noBestAskQ4        :: BSL.ByteString
     ,noBestAskQ5        :: BSL.ByteString
-    ,qAccTime           :: [Char]
+    ,qAccTime           :: BSL.ByteString
+    ,qAccTimeMS         :: Int64
     ,endOfMessage       :: BSL.ByteString
     } deriving (Show)
 

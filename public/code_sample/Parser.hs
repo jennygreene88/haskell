@@ -10,12 +10,14 @@ import Data.Binary.Get
 import qualified Data.Bool as Bool
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Lazy.Char8 as BSLC
+import Data.Char
 import Data.Int
 import Data.Maybe
 import Data.List
 import Data.Text.Encoding
 --import Data.DateTime
 import Data.Time.Clock
+import Data.Time.Clock.POSIX
 import Data.Time.LocalTime
 --import Data.Time.Format
 import Data.Word
@@ -102,9 +104,12 @@ parseQuotes' reorder bs = do
 printQuote :: Quote -> IO ()
 printQuote q = do
     --putStrLn (show q)
+    
+    putStrLn ("qat ms: "++ (show(qatToMS (qAccTime q))))
+
     putStr $ prettyPacketTime (packetTimeS q) (packetTimeSS q)
     putStr " "
-    putStr $ qAccTime q
+    putStr $ prettyQAT (qAccTime q)
     putStr " "
     BSLC.putStr (issueCode q) 
     putStr " "
@@ -180,31 +185,31 @@ printQuotesReorder bs = printQuotesReorder' [] bs 0 0
 -- sweep the list THEN add a new quote
 printQuotesReorder' :: [Quote] -> BSL.ByteString -> Int -> Int64 -> IO ()
 printQuotesReorder' quotes bs index timeMS = do
-    if (length quotes > 0) && (index <= (length quotes))
+    if (index < (length quotes))
     -- sweep (check the time of the quote that index points to)
     then do
-        putStrLn ("index = " ++ (show index))
-        if ((packetTimeMS (quotes !! index)) + 3000) < timeMS -- see if there's a quote older than 3sec
+        --putStrLn ("index = " ++ (show index))
+        if (( qAccTimeMS (quotes !! index)) + 3000) < timeMS -- see if there's a quote w/QAT 3sec older than packetTime.
         then do -- Print the Quote then pop it from the list
-            putStrLn "printing..."
+            --putStrLn "printing..."
             printQuote (quotes !! index)
-            putStrLn "popping..."
+            --putStrLn "popping..."
             printQuotesReorder' ((take index quotes)++(drop (index+1) quotes)) bs (index) timeMS 
         else do -- Quote isn't old enough to print, so just continue walking the quote list
-            putStrLn "quote is too young"
+            --putStrLn "quote is too young"
             printQuotesReorder' quotes bs (index+1) timeMS 
     else do -- Add a new Quote and start a new sweep
         let iNextPacket = getNextPacketIndex bs
-        putStrLn ("iNextPacket = " ++ (show iNextPacket))
+        --putStrLn ("iNextPacket = " ++ (show iNextPacket))
         case iNextPacket of
             Nothing -> do  -- no more packets, so just start a new sweep (eventually the list will run out)
                 putStrLn "\n NO MORE PACKETS \n"
-                printQuotesReorder' quotes bs 0 timeMS
+                -- printQuotesReorder' quotes bs 0 timeMS
             Just _  -> do -- Add the next Quote to the list and start a new sweep 
                 putStrLn "pushing new quote"
                 let bsNextPacket = BSL.drop (fromJust iNextPacket) bs
                 let q = runGet makeQuote bsNextPacket
-                printQuotesReorder' (q:quotes) (BSL.drop 215 bsNextPacket) 0 (packetTimeMS q)-- can do more than 215
+                printQuotesReorder' (q:quotes) (BSL.drop 215 bsNextPacket) 0 (packetMSToday q)-- can do more than 215
                 
                 
     {-|
@@ -275,28 +280,47 @@ getNextPacketIndex bs = do
 -- Format the Quote Accept Time.
 prettyQAT :: BSL.ByteString -> [Char]
 prettyQAT bs = do
-    let qHH = (wToS $ [BSL.index bs 0]) ++ (wToS $ [BSL.index bs 1]) ++ ":"
-    let qMM = qHH ++ (wToS $ [BSL.index bs 2]) ++ (wToS $ [BSL.index bs 3]) ++ ":"
-    let qSS = qMM ++ (wToS $ [BSL.index bs 4]) ++ (wToS $ [BSL.index bs 5]) ++ ":"
-    let q = qSS ++(wToS $ [BSL.index bs 6]) ++ (wToS $ [BSL.index bs 7])
+    let qHH = ([BSLC.index bs 0]) ++ ([BSLC.index bs 1]) ++ ":"
+    let qMM = qHH ++ ([BSLC.index bs 2]) ++ ([BSLC.index bs 3]) ++ ":"
+    let qSS = qMM ++ ([BSLC.index bs 4]) ++ ([BSLC.index bs 5]) ++ ":"
+    let q = qSS ++([BSLC.index bs 6]) ++ ([BSLC.index bs 7])
     q
-
     --[(qat!!0),(qat!!1),':',(qat!!2),(qat!!3),':',(qat!!4),(qat!!5)]
 
 -- pretty packet timestamp
 -- Take seconds & milliseconds and convert to a pretty timestamp string
 prettyPacketTime :: Word32 -> Word32 -> [Char]
-prettyPacketTime s ss = do
-    (show s)++"."++(show ss)++"s" 
+prettyPacketTime s ss =
+    ((show s)++"."++(show ss)++"s" )
 
-{-| 
+-- convert to milliseconds since midnight
+qatToMS :: BSL.ByteString -> Int64
+qatToMS bs = do
+    let qH1 = ( (fromIntegral ( digitToInt ( BSLC.index bs 0) ))::Int64) * 10 * 60 * 60 * 1000  
+    let qH2 = ( (fromIntegral ( digitToInt ( BSLC.index bs 1) ))::Int64)      * 60 * 60 * 1000
+    let qM1 = ( (fromIntegral ( digitToInt ( BSLC.index bs 2) ))::Int64) * 10      * 60 * 1000
+    let qM2 = ( (fromIntegral ( digitToInt ( BSLC.index bs 3) ))::Int64)           * 60 * 1000
+    let qS1 = ( (fromIntegral ( digitToInt ( BSLC.index bs 4) ))::Int64) * 10           * 1000
+    let qS2 = ( (fromIntegral ( digitToInt ( BSLC.index bs 5) ))::Int64)                * 1000
+    let qu1 = ( (fromIntegral ( digitToInt ( BSLC.index bs 6) ))::Int64) * 10 
+    let qu2 = ( (fromIntegral ( digitToInt ( BSLC.index bs 7) ))::Int64)      
+    (qH1 + qH2 + qM1 + qM2 + qS1 + qS2 + qu1 + qu2)
+
+
+-- get milliseconds since midnight
+packetTimeToMS :: Word32 -> Word32 -> Int64
+packetTimeToMS s ss =
+    1 -- TODO
+
+
+{-
     fill up Quote
     TODO: There is probably a prettier way to do this, but this works.
 -}
 makeQuote :: Get Quote
 makeQuote = do
     s       <- getWord32le -- Using getInt32le reverses bytes 
-    ss      <- getWord32le
+    ss      <- getWord32le -- subseconds packet timestamp
     cl      <- getLazyByteString 4 -- getWord32le
     ul      <- getLazyByteString 4 --getWord32le
     o       <- getLazyByteString 42 -- other packet info
@@ -341,13 +365,14 @@ makeQuote = do
     nbaq4   <- getLazyByteString 4
     nbaq5   <- getLazyByteString 4
     -- quote accept time
-    qat     <- getLazyByteString 8
+    qat     <- getLazyByteString 8 -- get as ByteString???
     eom     <- getLazyByteString 1
 
     return Quote{
         packetTimeS     = s
-        ,packetTimeSS   = ss    -- sub-seconds
-        ,packetTimeMS   = ((fromIntegral s)::Int64) * 1000 + ((fromIntegral ss)::Int64) -- total time in milliseconds
+        ,packetTimeSS   = ss    -- sub-seconds 
+        --,packetTimeMS   = ((fromIntegral s)::Int64) * 1000 + ((fromIntegral ss)::Int64) -- total time in milliseconds
+        ,packetMSToday  = packetTimeToMS s ss
         ,capLen         = cl
         ,untruncLen     = ul
         ,other          = o
@@ -391,7 +416,8 @@ makeQuote = do
         ,noBestAskQ3        = nbaq3
         ,noBestAskQ4        = nbaq4
         ,noBestAskQ5        = nbaq5
-        ,qAccTime           = prettyQAT qat
+        ,qAccTime           = qat
+        ,qAccTimeMS         = qatToMS qat -- convert to milliseconds since midnight
         ,endOfMessage       = eom
        
         }

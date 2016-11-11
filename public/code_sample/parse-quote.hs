@@ -3,6 +3,7 @@
 
 import Control.Applicative
 import Data.Bool
+import Data.Char
 import Data.Word
 import Data.List
 import Data.Maybe
@@ -33,7 +34,7 @@ main = do
         parseQuotes True bs
     else do
         parseQuotes False bs
-
+    
     -- BSL.drop results in an endless loop; need to use recursion to trim a ByteString.
     --parseQuotes False bs
 
