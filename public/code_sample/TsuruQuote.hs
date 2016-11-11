@@ -11,9 +11,9 @@ import Data.Word
 -- Value constructor names have to start with a capital letter
 -- Do I need to add strict?
 data Quote = Quote { 
-    -- sec            :: Word32 --Int32
-    --,subSec         :: Word32 --Int32
-    packetTime     :: [Char]
+    packetTimeS     :: Word32
+    ,packetTimeSS   :: Word32
+    ,packetTimeMS   :: Int64
     ,capLen         :: BSL.ByteString -- Word32
     ,untruncLen     :: BSL.ByteString -- Word32
     ,other          :: BSL.ByteString -- 

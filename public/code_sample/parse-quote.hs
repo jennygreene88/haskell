@@ -28,16 +28,11 @@ main = do
 
     bs <- BSL.readFile pcap_file
 
-    let reorder = False
     if elem "-r" args
     then do
-        let reorder = True
-        return ()
+        parseQuotes True bs
     else do
-        let reorder = False
-        return ()
-
-    parseQuotes reorder bs
+        parseQuotes False bs
 
     -- BSL.drop results in an endless loop; need to use recursion to trim a ByteString.
     --parseQuotes False bs

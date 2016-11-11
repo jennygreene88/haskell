@@ -36,24 +36,6 @@ sToW s = BSL.unpack $ BSLC.pack s
 wToS :: [Word8] -> String
 wToS w = BSLC.unpack $ BSL.pack w
 
-test :: [Word8] -> BSL.ByteString -> IO ()
-test w bs = do
-    let len = length w
-    --putStrLn ("length of '" ++ (wToS w) ++ "' = " ++ (show len))
-    let firstI = BSL.elemIndex (w !! 0) bs
-    BSLC.putStr (BSL.take 1 bs)
-    case firstI of
-        Nothing -> putStrLn "first element not found"
-        Just _  -> do
-            -- Found the first byte, so see if subsequent bytes are also there
-            let here = wordIsHere w len bs (fromJust firstI)
-            case here of
-                True  -> putStrLn ( "\nWord found at index: " ++ (show firstI) )
-                False -> do
-                    putStrLn ( "NOT found at index: " ++ (show (fromJust firstI)) )
-                    x <- (test w (BSL.drop ((fromJust firstI)+1) bs))
-                    return ()
-
 -- like BSL.elemIndex but takes [Word8] instead of Word
 -- TODO: don't calculate len every time 
 elemIndex' :: [Word8] -> BSL.ByteString -> Maybe Int64
@@ -90,23 +72,7 @@ wordIsHere' w i len bs k
     | w `genericIndex` i /= BSL.index bs k = False  -- this element does not match
     | otherwise = wordIsHere' w (i+1) len bs (k+1)
 
--- Walk through a ByteStream and look for packets.
--- When a packet is found, print out information about it.
-walk w bs = walk' w bs 1
-
-walk' :: [Word8] -> BSL.ByteString -> Int64 -> IO ()
-walk' w bs counter = do
-    let i = elemIndex' w bs
-    --putStrLn $ "i = " ++ (show (fromJust i))
-    case i of Nothing -> putStrLn "End of ByteString."
-              Just _ -> do
-                       putStrLn $ "Packet # " ++ (show counter)
-                       --putStrLn "packet info goes here"
-                       -- Using tail recursion can read the ByteString forever without filling up the stack
-                       walk' w (BSL.drop ((fromJust i)+1) bs) (counter + 1)
-
 -- main parsing entry point
--- Returns: nothing
 parseQuotes :: Bool -> BSL.ByteString -> IO ()
 parseQuotes reorder bs = do
     parseQuotes' reorder bs
@@ -121,14 +87,10 @@ parseQuotes' reorder bs = do
             printQuotes bs
         -- reorder
         True -> do
-            putStrLn "reorder :)"
-            return ()
-            {-|
-            let q = getNextQuote bs
-            case q of
-                Nothing -> do
-                    -- flush remaining packets
-                    putStrLn "\n<EOF>\n"
+            printQuotesReorder bs
+            {-
+            printQuotesReorder
+
                 Just _  -> do
                     -- print quotes
                     trace "printing quotes..." (return ())
@@ -136,10 +98,60 @@ parseQuotes' reorder bs = do
                     parseQuotes' reorder quotes (BSL.drop (fromJust i) bs) -- TODO add the length of the packet
             -}
 
+-- Print one Quote
+printQuote :: Quote -> IO ()
+printQuote q = do
+    --putStrLn (show q)
+    putStr $ prettyPacketTime (packetTimeS q) (packetTimeSS q)
+    putStr " "
+    putStr $ qAccTime q
+    putStr " "
+    BSLC.putStr (issueCode q) 
+    putStr " "
+    BSLC.putStr (bestBidQ5 q)
+    putStr "@"
+    BSLC.putStr (bestBidP5 q)
+    putStr " "
+    BSLC.putStr (bestBidQ4 q)
+    putStr "@"
+    BSLC.putStr (bestBidP4 q)
+    putStr " "
+    BSLC.putStr (bestBidQ3 q)
+    putStr "@"
+    BSLC.putStr (bestBidP3 q)
+    putStr " "
+    BSLC.putStr (bestBidQ2 q)
+    putStr "@"
+    BSLC.putStr (bestBidP2 q)
+    putStr " "
+    BSLC.putStr (bestBidQ1 q)
+    putStr "@"
+    BSLC.putStr (bestBidP1 q)
+    putStr " "
+    BSLC.putStr (bestAskQ1 q)
+    putStr "@"
+    BSLC.putStr (bestAskP1 q)
+    putStr " "
+    BSLC.putStr (bestAskQ2 q)
+    putStr "@"
+    BSLC.putStr (bestAskP2 q)
+    putStr " "
+    BSLC.putStr (bestAskQ3 q)
+    putStr "@"
+    BSLC.putStr (bestAskP3 q)
+    putStr " "
+    BSLC.putStr (bestAskQ4 q)
+    putStr "@"
+    BSLC.putStr (bestAskP4 q)
+    putStr " "
+    BSLC.putStr (bestAskQ5 q)
+    putStr "@"
+    BSLC.putStr (bestAskP5 q)
+    putStr "\n\n"
+
 -- non reorder
 printQuotes :: BSL.ByteString -> IO ()
 printQuotes bs = do
-
     let iNextPacket = getNextPacketIndex bs
     case iNextPacket of
         Nothing -> putStrLn "\n<EOF>\n"
@@ -151,69 +163,93 @@ printQuotes bs = do
             --putStrLn $ show $ dataType q
             if (show $ dataType q) == show "B6" 
             then do
-                --putStrLn (show q)
-                putStr (packetTime q)
-                putStr " "
-                putStr (qAccTime q)
-                putStr " "
-                BSLC.putStr (issueCode q) 
-                putStr " "
-                BSLC.putStr (bestBidQ5 q)
-                putStr "@"
-                BSLC.putStr (bestBidP5 q)
-                putStr " "
-                BSLC.putStr (bestBidQ4 q)
-                putStr "@"
-                BSLC.putStr (bestBidP4 q)
-                putStr " "
-                BSLC.putStr (bestBidQ3 q)
-                putStr "@"
-                BSLC.putStr (bestBidP3 q)
-                putStr " "
-                BSLC.putStr (bestBidQ2 q)
-                putStr "@"
-                BSLC.putStr (bestBidP2 q)
-                putStr " "
-                BSLC.putStr (bestBidQ1 q)
-                putStr "@"
-                BSLC.putStr (bestBidP1 q)
-                putStr " "
-                BSLC.putStr (bestAskQ1 q)
-                putStr "@"
-                BSLC.putStr (bestAskP1 q)
-                putStr " "
-                BSLC.putStr (bestAskQ2 q)
-                putStr "@"
-                BSLC.putStr (bestAskP2 q)
-                putStr " "
-                BSLC.putStr (bestAskQ3 q)
-                putStr "@"
-                BSLC.putStr (bestAskP3 q)
-                putStr " "
-                BSLC.putStr (bestAskQ4 q)
-                putStr "@"
-                BSLC.putStr (bestAskP4 q)
-                putStr " "
-                BSLC.putStr (bestAskQ5 q)
-                putStr "@"
-                BSLC.putStr (bestAskP5 q)
-                putStr "\n\n"
+                printQuote q
                 
                 -- next quote
-                -- I can safely drop 215 bytes (data length); more if I wanted.
-                printQuotes (BSL.drop (215) bsNextPacket)
+                -- I can safely drop 215 bytes (data length); more if I wanted b/c of other headers.
+                printQuotes (BSL.drop 215 bsNextPacket)
 
             else do
-                putStrLn (show q) 
-                putStrLn "[invalid packet ????????????????????]\n"
+                putStrLn ("[invalid packet:]\n"++(show q)++"\n") 
 
-printQuotesReorder :: [Quote] -> Quote -> IO ()
-printQuotesReorder quotes q = do
+-- reorder
+-- walk through ByteString and maintain a buffer list of Quotes
+printQuotesReorder :: BSL.ByteString -> IO ()
+printQuotesReorder bs = printQuotesReorder' [] bs 0 0
+-- recursive version
+-- sweep the list THEN add a new quote
+printQuotesReorder' :: [Quote] -> BSL.ByteString -> Int -> Int64 -> IO ()
+printQuotesReorder' quotes bs index timeMS = do
+    if (length quotes > 0) && (index <= (length quotes))
+    -- sweep (check the time of the quote that index points to)
+    then do
+        putStrLn ("index = " ++ (show index))
+        if ((packetTimeMS (quotes !! index)) + 3000) < timeMS -- see if there's a quote older than 3sec
+        then do -- Print the Quote then pop it from the list
+            putStrLn "printing..."
+            printQuote (quotes !! index)
+            putStrLn "popping..."
+            printQuotesReorder' ((take index quotes)++(drop (index+1) quotes)) bs (index) timeMS 
+        else do -- Quote isn't old enough to print, so just continue walking the quote list
+            putStrLn "quote is too young"
+            printQuotesReorder' quotes bs (index+1) timeMS 
+    else do -- Add a new Quote and start a new sweep
+        let iNextPacket = getNextPacketIndex bs
+        putStrLn ("iNextPacket = " ++ (show iNextPacket))
+        case iNextPacket of
+            Nothing -> do  -- no more packets, so just start a new sweep (eventually the list will run out)
+                putStrLn "\n NO MORE PACKETS \n"
+                printQuotesReorder' quotes bs 0 timeMS
+            Just _  -> do -- Add the next Quote to the list and start a new sweep 
+                putStrLn "pushing new quote"
+                let bsNextPacket = BSL.drop (fromJust iNextPacket) bs
+                let q = runGet makeQuote bsNextPacket
+                printQuotesReorder' (q:quotes) (BSL.drop 215 bsNextPacket) 0 (packetTimeMS q)-- can do more than 215
+                
+                
+    {-|
+    -- add new quote to list
+    let iNextPacket = getNextPacketIndex bs
+    case iNextPacket of
+        Nothing -> do
+            -- no more packets
+            putStrLn "\n NO MORE QUOTES \n"
+            flushQuotes quotes
+        Just _  -> do
+            let bsNextPacket = BSL.drop (fromJust iNextPacket) bs
+            let q = runGet makeQuote bsNextPacket
+            --putStrLn "APPENDING NEW QUOTE"
+            let newQs = processQuotes (q:quotes) 0 (packetTimeMS q)
+            case newQs of
+                [] -> putStrLn "EMPTY QUOTE LIST"
+                _  ->  printQuotesReorder' ( newQs ) (BSL.drop 215 bsNextPacket)
+    -}
 
-    -- grab "current" timestamp from newPacket
-    -- add newPacket to quotes
-    -- print and flush packets 3 seconds older than "current" timestamp, starting with oldest
+{-|
+-- sweep the list and print any that are older than 3 seconds
+processQuotes :: [Quote] -> Int -> Int64 -> [Quote]
+processQuotes quotes index timeMS = do
+    trace "\nPROCESSING A QUOTE!\n" []
+    if index > (length quotes)
+    then quotes
+    else
+        case quotes of
+            [] -> []
+            _  -> do
+                if ( (packetTimeMS (quotes !! index)) + 3000) < timeMS
+                then do
+                    return (printQuote (quotes !! index))
+                    processQuotes  ((take index quotes)++(drop (index+1) quotes)) (index+1) timeMS
+                else quotes -- no quotes to print
+-}
+
+-- Print all the quotes in the list, from oldest to newest
+flushQuotes :: [Quote] -> IO ()
+flushQuotes quotes = do
+    -- TODO
+    putStrLn "\nFLUSHING\n"
     return ()
+
 
 -- count packets for debugging
 countPackets :: BSL.ByteString -> Int64 -> IO Int64
@@ -236,7 +272,7 @@ getNextPacketIndex bs = do
         -- include the header
         Just _  -> (Just ((fromJust i) - 16 - 42))  --Just (i - 16) -- TODO error handling for invalid index
 
--- Make the Quote Accept Time into a neat string to be stored in a Quote.
+-- Format the Quote Accept Time.
 prettyQAT :: BSL.ByteString -> [Char]
 prettyQAT bs = do
     let qHH = (wToS $ [BSL.index bs 0]) ++ (wToS $ [BSL.index bs 1]) ++ ":"
@@ -244,6 +280,8 @@ prettyQAT bs = do
     let qSS = qMM ++ (wToS $ [BSL.index bs 4]) ++ (wToS $ [BSL.index bs 5]) ++ ":"
     let q = qSS ++(wToS $ [BSL.index bs 6]) ++ (wToS $ [BSL.index bs 7])
     q
+
+    --[(qat!!0),(qat!!1),':',(qat!!2),(qat!!3),':',(qat!!4),(qat!!5)]
 
 -- pretty packet timestamp
 -- Take seconds & milliseconds and convert to a pretty timestamp string
@@ -307,9 +345,9 @@ makeQuote = do
     eom     <- getLazyByteString 1
 
     return Quote{
-        --sec             = s
-        --,subSec         = ss
-        packetTime      = prettyPacketTime s ss
+        packetTimeS     = s
+        ,packetTimeSS   = ss    -- sub-seconds
+        ,packetTimeMS   = ((fromIntegral s)::Int64) * 1000 + ((fromIntegral ss)::Int64) -- total time in milliseconds
         ,capLen         = cl
         ,untruncLen     = ul
         ,other          = o
@@ -353,7 +391,7 @@ makeQuote = do
         ,noBestAskQ3        = nbaq3
         ,noBestAskQ4        = nbaq4
         ,noBestAskQ5        = nbaq5
-        ,qAccTime           = (prettyQAT qat)
+        ,qAccTime           = prettyQAT qat
         ,endOfMessage       = eom
        
         }
