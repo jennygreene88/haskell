@@ -1,0 +1,178 @@
+========================================
+OPERATORS, KEYWORDS, COMMANDS, FUNCTIONS
+========================================
+
+()
+    - The empty tuple is a value of () and it also has a type of ().
+(.)
+    - Function composition operator.
+    - Similar to UNIX pipe operator.
+(,)
+    - Same as (\x y -> (x,y))
+(,,)
+    - A function that is the same as (\x y z -> (x,y,z))
+(:-:)
+    - Fixity declaration. Used when defining a function as an operator to give them a fixity.
+    - Order of operations.
+    - Examples:
+        + infixl 7 *        * has fixity of 7 and is left-associative.
+        + infixl 6 +        + has fixity of 6 and is left-associative.
+(!)
+    - Strict field in data constructor
+    - Examples:
+        + data Trade = Trade { timestamp :: !Word32} deriving (Show)
+(->)
+    - A functor that ...
+(<$>)
+    - (<$>) :: (Functor f) => (a -> b) -> f a -> f b 
+    - Use normal function on applicative functors
+    - Examples:
+        + (*) <$> Just 2 <*> Just 8
+          Here, <$> applies (*) to 2 inside the applicative functor Just.
+(<*>)
+    - module: Control.Applicative
+    - class (Functor f) => Applicative f where  
+        pure :: a -> f a  
+        (<*>) :: f (a -> b) -> f a -> f b 
+    - Extracts function from functor and applies it to other functor
+    - Examples:
+        + (*) <$> Just 2 <*> Just 8
+(>>)
+    - implementation:
+        (>>) :: (Monad m) => m a -> m b -> m b      
+        m >> n = m >>= \_ -> n  
+(>>=)
+    - (>>=) :: (Monad m) => m a -> (a -> m b) -> m b  
+    - "bind" function
+    - takes a monadic value and a function that takes a normal value, returns
+        a monadic value, and applies the function to a monadic value.
+class
+    - Used to define a new typeclass.
+    - Examples:
+        class Eq a where                <- Eq is the typeclass being defined
+            (==) :: a -> a -> Bool      <- these are functions that can optionally be implemented here
+            (/=) :: a -> a -> Bool  
+            x == y = not (x /= y)  
+            x /= y = not (x == y)
+cons
+    - synonym for :
+data
+    - Defines new (data) type with a data constructor.
+    - Use the `instance' keyword to make a type an instance of a typeclass.
+do
+    - Take several I/O actions and glue them into one
+instance
+    - Makes a type an instance of a typeclass.
+Monad
+    - A typeclass that...
+    - type class:
+        class Monad m where  
+            return :: a -> m a  
+            (>>=) :: m a -> (a -> m b) -> m b  
+            (>>) :: m a -> m b -> m b  
+            x >> y = x >>= \_ -> y  
+            fail :: String -> m a  
+            fail msg = error msg  
+pure
+    - wraps normal function up into (an applicative functor?)
+    - function that wraps value up into a data type
+return
+    - Makes an I/O action that doesn't do anything, just yields value as result, doesn't
+        do any I/O operations.
+    - Wraps the value in an I/O context.
+    - Useful when you need I/O output but don't need to actually do anything.
+type
+    - Type constructor.
+    - make new types
+    - Examples:
+        type Birds = Int            <- type synonym for Int called eBirds'
+        type Pole = (Birds,Birds)
+
+
+========================================
+TERMS, CONCEPTS
+========================================
+action
+    - Goes out and brings something back in a box
+    - Examples:
+        + IO (a -> b)       I/O action that yields a function
+        + IO a              I/O action
+applicative functor
+    - Used to apply functor to functor
+    - allow us to view values of certain data types as values with contexts
+    - allow us to use normal functions on those values while preserving the meaning of those contexts
+    - Examples:
+        + 
+Applicative typeclass
+    - allows us to use normal functions on an applicative value while preserving the context
+applicative value
+    - value with added context
+    - Examples:
+        + 'a' is a value. Just 'a' is an applicative value.
+class
+    - synonym for typeclass
+class constraint
+    - Specify class of parameter
+    - Examples:
+        + (Functor f) in:
+            (<$>) :: (Functor f) => (a -> b) -> f a -> f b 
+concrete type
+    - example:
+        + Maybe Int
+data constructor
+    - defines a "data type"
+    - examples:
+        + data Person = Person { firstName :: String} deriving (Eq)
+            * firstName is a "field"
+            * Person{...} is a "value constructor". There is one value constructor here.
+functor
+    - Something that can be mapped over
+    - examples:
+        + Else
+        + Maybe
+        + List
+    - a computational context
+lifting a function
+    - taking a function (a -> b) and returning (f a -> f b) where f is a functor.
+monad
+    - applicative functor that supports the bind (>>=) function.
+    - Can be members of classes.
+record
+    - Examples:
+        + data Person = Person String String Int Float String String deriving (Show)  
+        + With record syntax: 
+              data Person = Person { firstName :: String  
+                                   , lastName :: String  
+                                   , age :: Int  
+                                   , height :: Float  
+                                   , phoneNumber :: String  
+                                   , flavor :: String  
+                                   } deriving (Show)  
+type
+    - examples:
+        + Int
+typeclass (or "class")
+    - like interfaces of other OO languages
+    - A monad can be a member of a class.
+    - data type can derive typeclass ('deriving' keyword) and thereby be an "instance"
+    - examples:
+        + Eq
+        + fmap :: (a -> b) -> f a -> f b 
+        + class (Functor f) => Applicative f where ...
+type constructor
+    - takes types as parameters and produces new types
+    - like a "template" in C++
+    - defines a "kind"
+    - instance of a type constructor is called "concrete type"
+    - examples:
+        + (->) r a
+        + data Maybe a = Nothing | Just a
+            a is type parameter
+            Since there is a type parameter, Maybe is a type constructor.
+type synonym
+    - Can be parameterized.
+    - Examples:
+        + type String = [Char]
+value constructor
+    - takes value parameter(s) and produces a new value
+
